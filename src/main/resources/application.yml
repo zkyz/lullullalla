@@ -1,0 +1,19 @@
+server:
+  port: 8888
+  
+spring:
+  output.ansi.enabled: ALWAYS
+
+  session:
+    store-type: jdbc
+    jdbc.schema: classpath:schema-session.sql
+
+  h2.console:
+      enabled: true
+
+
+  datasource:
+    driverClassName: net.sf.log4jdbc.DriverSpy
+    url: jdbc:log4jdbc:h2:~/test
+    username: sa
+    password:
