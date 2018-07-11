@@ -1,4 +1,4 @@
-package kr.or.knia.lullullalla;
+package kr.or.knia.cbms;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -7,10 +7,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class LullullallaApplicationTests {
+public class CbmsApplicationTests {
 
-	@Test
-	public void contextLoads() {
-	}
-
+  @Test
+  public void contextLoads() {
+  }
 }

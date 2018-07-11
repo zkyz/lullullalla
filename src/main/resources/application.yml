@@ -1,16 +1,17 @@
 server:
   port: 8888
-  
+
 spring:
   output.ansi.enabled: ALWAYS
 
   session:
     store-type: jdbc
-    jdbc.schema: classpath:schema-session.sql
+    jdbc:
+      schema: classpath:schema-session.sql
+      table-name: CURR_SESSION
 
   h2.console:
       enabled: true
-
 
   datasource:
     driverClassName: net.sf.log4jdbc.DriverSpy
