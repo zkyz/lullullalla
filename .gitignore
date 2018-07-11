@@ -2,4 +2,19 @@
 .classpath
 .project
 target
-web/node_modules
+web/node_modules/
+web/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+web/test/unit/coverage/
+web/test/e2e/reports/
+selenium-debug.log
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
