@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CbmsApplication {
 
   /**
-   * sample start.
+   * cbms start.
    * 
    * @param args some spring default settings
    */

@@ -9,11 +9,9 @@ spring:
   session:
     store-type: jdbc
     jdbc:
-      schema: classpath:schema-session.sql
       table-name: CURR_SESSION
-
-  h2.console:
-      enabled: true
+      initialize-schema: never
+      # schema: classpath:schema-session.sql
 
   datasource:
     driverClassName: net.sf.log4jdbc.DriverSpy
@@ -21,7 +19,16 @@ spring:
     username: sa
     password:
 
+  h2:
+    console:
+      enabled: true
+      path: /system/h2-console
+
 logging:
   level:
-    jdbc.audit: WARN
-    jdbc.sqlonly: WARN
+    jdbc: WARN
+
+management:
+  endpoints:
+    web:
+      base-path: /system/actuator
