@@ -4,6 +4,8 @@ server:
 spring:
   output.ansi.enabled: ALWAYS
 
+  devtools.restart.enabled: false
+
   session:
     store-type: jdbc
     jdbc:
@@ -18,3 +20,8 @@ spring:
     url: jdbc:log4jdbc:h2:~/test
     username: sa
     password:
+
+logging:
+  level:
+    jdbc.audit: WARN
+    jdbc.sqlonly: WARN
