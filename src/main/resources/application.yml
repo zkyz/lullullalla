@@ -4,7 +4,7 @@ server:
 spring:
   output.ansi.enabled: ALWAYS
 
-  devtools.restart.enabled: false
+  devtools.restart.enabled: true
 
   session:
     store-type: jdbc
