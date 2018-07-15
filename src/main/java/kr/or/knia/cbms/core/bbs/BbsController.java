@@ -2,39 +2,44 @@ package kr.or.knia.cbms.core.bbs;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.SortDefault;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping(path = "/{category}/bbs")
 public class BbsController {
-  
-  private BbsService service;
-  
-  public BbsController(final BbsService service) {
+
+  private final BbsService service;
+
+  @Autowired
+  public BbsController(BbsService service) {
     this.service = service;
   }
 
-  @GetMapping({"/{category}/bbs/list"})
-  public Page<Article> list(Article search, Pageable page) {
+  @GetMapping("/list")
+  public Page<Article> list(Article search,
+                            @SortDefault.SortDefaults({
+                              @SortDefault(sort = "id", direction = Sort.Direction.DESC),
+                              @SortDefault(sort = "created", direction = Sort.Direction.DESC)
+                            }) Pageable page) {
     return service.list(search, page);
   }
   
-  @GetMapping("/{category}/bbs/{id}")
+  @GetMapping("/{id}")
   public Article item(@PathVariable Integer id) {
     return service.item(id);
   }
 
-  @PostMapping("/{category}/bbs/{id}")
+  @PostMapping("/{id}")
   public Article save(@Valid Article article) {
     return service.save(article);
   }
   
-  @DeleteMapping("/{category}/bbs/{id}")
+  @DeleteMapping("/{id}")
   public void delete(@PathVariable Integer id) {
     service.delete(id);
   }

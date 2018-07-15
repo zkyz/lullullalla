@@ -1,28 +1,21 @@
 package kr.or.knia.cbms.core.bbs;
 
-import java.time.LocalDateTime;
-import javax.persistence.Basic;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
 import lombok.Data;
 import org.springframework.data.annotation.LastModifiedDate;
 
-@Entity
-@Table(name = "BBS")
+import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import java.time.LocalDateTime;
+
 @Data
-@SequenceGenerator(name = Article.SQ_BBS_ID, sequenceName = Article.SQ_BBS_ID)
+@Entity
+@Table(name = "CBMS_BBS")
+@SequenceGenerator(name = Article.SQ_BBS_ID, sequenceName = Article.SQ_BBS_ID, allocationSize = 1)
 public class Article {
-  public static final String SQ_BBS_ID = "SQ_BBS_ID";
+  public static final String SQ_BBS_ID = "SQ_CBMS_BBS_ID";
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = Article.SQ_BBS_ID)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SQ_BBS_ID)
   private Integer id;
 
   @NotEmpty
@@ -35,9 +28,4 @@ public class Article {
 
   @LastModifiedDate
   private LocalDateTime updated;
-
-  @Lob
-  @Basic(fetch = FetchType.LAZY)
-  private String content;
-
 }

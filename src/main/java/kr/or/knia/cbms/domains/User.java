@@ -2,29 +2,21 @@ package kr.or.knia.cbms.domains;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
+import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.Set;
+
 @Data
 @Entity
-@SequenceGenerator(name = User.SEQ_NAME, sequenceName = "SQ_USER_SEQ")
+@Table(name = "CBMS_USER")
 public class User {
-  public static final String SEQ_NAME = "SQ_USER_SEQ";
-
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = User.SEQ_NAME)
-  private Integer seq;
-
-  @Column(unique = true)
   private String id;
-  
+
   @JsonIgnore
   private String password;
 
@@ -36,4 +28,8 @@ public class User {
   private String mobile;
   
   private String tel;
+
+  // private Set<UserRoles.Role> roles;
+
+  private LocalDateTime approved;
 }

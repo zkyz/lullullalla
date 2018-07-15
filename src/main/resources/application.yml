@@ -4,25 +4,32 @@ server:
 spring:
   output.ansi.enabled: ALWAYS
 
-  devtools.restart.enabled: true
-
-  session:
-    store-type: jdbc
-    jdbc:
-      table-name: CURR_SESSION
-      initialize-schema: never
-      # schema: classpath:schema-session.sql
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
 
   datasource:
     driverClassName: net.sf.log4jdbc.DriverSpy
     url: jdbc:log4jdbc:h2:~/test
     username: sa
     password:
+    initialization-mode: never
+    schema: classpath:schema-demo-init.sql
+    continue-on-error: true
 
   h2:
     console:
       enabled: true
       path: /system/h2-console
+
+  session:
+    store-type: jdbc
+    jdbc:
+      table-name: CBMS_CURR_SESSION
+      initialize-schema: never
+      schema:
+
 
 logging:
   level:

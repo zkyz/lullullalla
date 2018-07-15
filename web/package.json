@@ -1,25 +1,26 @@
 {
   "name": "cbms-web",
   "version": "1.0.0",
-  "description": "cbms front-end",
-  "author": "hello9reen@gmail.com",
   "private": true,
   "scripts": {
+    "build": "node build/build.js",
+    "test": "npm run unit && npm run e2e",
+    "e2e": "node test/e2e/runner.js",
+    "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
-    "unit": "jest --config test/unit/jest.conf.js --coverage",
-    "e2e": "node test/e2e/runner.js",
-    "test": "npm run unit && npm run e2e",
-    "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
-    "build": "node build/build.js"
+    "unit": "jest --config test/unit/jest.conf.js --coverage"
   },
   "dependencies": {
     "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
+    "material-design-icons-iconfont": "^3.0.3",
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1"
+    "vue-router": "^3.0.1",
+    "vuetify": "^1.1.4"
   },
   "devDependencies": {
+    "@babel/polyfill": "^7.0.0-beta.49",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-eslint": "^8.2.1",
@@ -65,6 +66,7 @@
     "shelljs": "^0.7.6",
     "uglifyjs-webpack-plugin": "^1.1.1",
     "url-loader": "^0.5.8",
+    "vue-cli-plugin-vuetify": "^0.1.6",
     "vue-jest": "^1.0.2",
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",
@@ -74,13 +76,15 @@
     "webpack-dev-server": "^2.9.1",
     "webpack-merge": "^4.1.0"
   },
-  "engines": {
-    "node": ">= 6.0.0",
-    "npm": ">= 3.0.0"
-  },
   "browserslist": [
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "description": "cbms front-end",
+  "author": "hello9reen@gmail.com",
+  "engines": {
+    "node": ">= 6.0.0",
+    "npm": ">= 3.0.0"
+  }
 }
