@@ -1,4 +1,4 @@
-package kr.or.knia.cbms.config.mybatis;
+package kr.or.knia.cbms.config.mybatis.typehandler;
 
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;

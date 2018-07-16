@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 public class BbsServiceImpl implements BbsService {
   
   @Autowired
-  private BbsRepository repository;
+  private BbsMapper mapper;
 
   @Override
   public Page<Article> list(Article search, Pageable pageable) {
-    return repository.findByCategory(search.getCategory(), pageable);
+    return null;//mapper.getList("", "");
   }
 
   @Override

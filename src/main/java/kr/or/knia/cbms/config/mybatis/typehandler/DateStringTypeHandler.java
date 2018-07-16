@@ -1,4 +1,4 @@
-package kr.or.knia.cbms.config.mybatis;
+package kr.or.knia.cbms.config.mybatis.typehandler;
 
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

@@ -15,7 +15,6 @@ public class BbsController {
 
   private final BbsService service;
 
-  @Autowired
   public BbsController(BbsService service) {
     this.service = service;
   }

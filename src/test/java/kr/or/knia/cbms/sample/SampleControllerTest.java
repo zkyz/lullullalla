@@ -1,4 +1,4 @@
-package kr.or.knia.cbms.sample;import static org.junit.Assert.*;
+package kr.or.knia.cbms.sample;
 
 public class SampleControllerTest {
 

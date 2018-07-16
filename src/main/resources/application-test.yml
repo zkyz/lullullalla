@@ -1,51 +1,7 @@
-server:
-  port: 8888
-
 spring:
-  output.ansi.enabled: ALWAYS
-
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-
   datasource:
     driverClassName: net.sf.log4jdbc.DriverSpy
     url: jdbc:log4jdbc:h2:~/test
     username: sa
     password:
-    initialization-mode: never
     schema: classpath:schema-demo-init.sql
-    continue-on-error: true
-
-  h2:
-    console:
-      enabled: true
-      path: /system/h2-console
-
-  session:
-    store-type: jdbc
-    jdbc:
-      table-name: CBMS_CURR_SESSION
-      initialize-schema: never
-      schema:
-
-
-logging:
-  level:
-    jdbc: WARN
-
-management:
-  endpoints:
-    web:
-      base-path: /system/actuator
-
-
-mybatis:
-  mapper-locations: classpath:kr/or/knia/cbms/core/bbs/BbsMapper.xml
-  type-aliases-package: kr.or.knia.cbms
-  type-handlers-package: kr.or.knia.cbms.config.mybatis.typehandler
-  configuration:
-    jdbc-type-for-null: varchar
-    map-underscore-to-camel-case: true
-

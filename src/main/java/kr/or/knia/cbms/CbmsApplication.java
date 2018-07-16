@@ -1,8 +1,6 @@
 package kr.or.knia.cbms;
 
-import kr.or.knia.cbms.domains.User;
 import org.springframework.boot.Banner.Mode;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -11,7 +9,7 @@ public class CbmsApplication {
 
   /**
    * cbms start.
-   * 
+   *
    * @param args some spring default settings
    */
   public static void main(String... args) {

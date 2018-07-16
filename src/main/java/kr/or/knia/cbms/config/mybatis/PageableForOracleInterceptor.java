@@ -1,9 +1,4 @@
-package kr.or.knia.gistat.starter.legacy.config.mybatis.page;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+package kr.or.knia.cbms.config.mybatis;
 
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
@@ -12,177 +7,163 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.MappedStatement.Builder;
 import org.apache.ibatis.mapping.ResultMap;
 import org.apache.ibatis.mapping.SqlSource;
-import org.apache.ibatis.plugin.Interceptor;
-import org.apache.ibatis.plugin.Intercepts;
-import org.apache.ibatis.plugin.Invocation;
-import org.apache.ibatis.plugin.Plugin;
-import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.plugin.*;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Pageable;
 
-import kr.or.knia.gistat.starter.legacy.config.mybatis.MybatisDaoSupport;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
 @Intercepts({
-		@Signature(type = Executor.class, method = "query", args = {
-				MappedStatement.class, Object.class, RowBounds.class,
-				ResultHandler.class }),
-		@Signature(type = Executor.class, method = "query", args = {
-				MappedStatement.class, Object.class, RowBounds.class,
-				ResultHandler.class, CacheKey.class, BoundSql.class }) })
+        @Signature(type = Executor.class, method = "query", args = {
+                MappedStatement.class, Object.class, RowBounds.class,
+                ResultHandler.class}),
+        @Signature(type = Executor.class, method = "query", args = {
+                MappedStatement.class, Object.class, RowBounds.class,
+                ResultHandler.class, CacheKey.class, BoundSql.class})})
 public class PageableForOracleInterceptor implements Interceptor {
-	private static final Logger log = LoggerFactory
-			.getLogger("--- mybatis execute ---");
 
-	public Object intercept(Invocation invocation) throws Throwable {
-		MappedStatement ms_page;
-		MappedStatement ms = (MappedStatement) invocation.getArgs()[0];
-		Object param = invocation.getArgs()[1];
-		ResultHandler<?> resultHandler = (ResultHandler<?>) invocation.getArgs()[3];
+  public Object intercept(Invocation invocation) throws Throwable {
+    MappedStatement ms_page;
+    MappedStatement ms = (MappedStatement) invocation.getArgs()[0];
+    Object params = invocation.getArgs()[1];
+    ResultHandler<?> resultHandler = (ResultHandler<?>) invocation.getArgs()[3];
 
-		Executor executor = (Executor) invocation.getTarget();
+    Pageable pageable = null;
+    List<Object> parameters = new ArrayList<>(1);
 
-		if (param instanceof MybatisDaoSupport.PageableParam) {
-			MybatisDaoSupport.PageableParam pp = (MybatisDaoSupport.PageableParam) param;
-			Object parameters = pp.getParam();
-			Pageable pageable = pp.getPageable();
-			
-			
-			if (pageable != null) {
-				boolean isNumberResultType = false;
-				for (ResultMap resultMap : ms.getResultMaps()) {
-					Class<?> type = resultMap.getType();
-					isNumberResultType = Integer.class.equals(type) || type.isPrimitive();
-					if (isNumberResultType)
-						break;
-				}
-	
-				if (!isNumberResultType) {
-					BoundSql boundSql = ms.getBoundSql(parameters);
-					List<ResultMap> resultMap = ms.getResultMaps();
-	
-					ms_page = createNewMappedStatementForTotalCount(ms, parameters);
-	
-					Object counting = executor.query(ms_page, parameters, RowBounds.DEFAULT, resultHandler);
-					int totalCount = 0;
-	
-					if (counting instanceof List) {
-						@SuppressWarnings("unchecked")
-						List<Integer> resultList = (List<Integer>) counting;
-						totalCount = resultList.get(0);
-					} else if (counting instanceof Number) {
-						totalCount = ((Number) counting).intValue();
-					} else {
-						log.debug("totalCount: {}", counting);
-						throw new RuntimeException("page count is not found!");
-					}
-	
-					pageable.setRowCount(totalCount);
-	
-					if (totalCount < 1)
-						return executor.query(ms, parameters, RowBounds.DEFAULT, resultHandler);
-	
-					ms = createNewMappedStatementForPagination(ms, boundSql,
-							resultMap, parameters, pageable);
-				}
-			}
+    if (params != null) {
+      for (Object param : parameters) { //params) {
+        if (param instanceof Pageable) pageable = (Pageable) param;
+        else parameters.add(param);
+      }
 
-			return executor.query(ms, parameters, RowBounds.DEFAULT, resultHandler);
-		}
+      if (pageable != null) {
+        BoundSql boundSql = ms.getBoundSql(parameters.toArray());
+        List<ResultMap> resultMap = ms.getResultMaps();
 
-		return invocation.proceed();
-	}
+        ms_page = createNewMappedStatementForTotalCount(ms, parameters);
 
-	public Object plugin(Object target) {
-		return Plugin.wrap(target, this);
-	}
+        Executor executor = (Executor) invocation.getTarget();
+        Object counting = executor.query(ms_page, parameters, RowBounds.DEFAULT, resultHandler);
+        long totalCount = 0;
 
-	public void setProperties(Properties properties) {
-	}
+        if (counting instanceof List) {
+          @SuppressWarnings("unchecked")
+          List<Long> resultList = (List<Long>) counting;
+          totalCount = resultList.get(0);
+        }
+        else if (counting instanceof Number) {
+          totalCount = ((Number) counting).longValue();
+        }
 
-	private MappedStatement createNewMappedStatementForTotalCount(
-			final MappedStatement ms, Object param) throws Exception {
-		final BoundSql boundSql = ms.getBoundSql(param);
-		final StringBuilder sql = new StringBuilder();
-		sql.append("SELECT COUNT(*) FROM (");
-		sql.append(boundSql.getSql());
-		sql.append(")");
+        // set page count
+        //pageable.setRowCount(totalCount);
 
-		Builder builder = new Builder(ms.getConfiguration(),
-				ms.getId() + "_Count", new SqlSource() {
-					public BoundSql getBoundSql(Object parameterObject) {
-						return new BoundSql(ms.getConfiguration(),
-								sql.toString(),
-								boundSql.getParameterMappings(),
-								boundSql.getParameterObject());
-					}
-				}, ms.getSqlCommandType());
+        if (totalCount < 1)
+          return executor.query(ms, parameters, RowBounds.DEFAULT, resultHandler);
 
-		List<ResultMap> resultMaps = new ArrayList<ResultMap>(1);
-		resultMaps.add(new ResultMap.Builder(ms.getConfiguration(), ms.getId()
-				+ "_Count_Inline", Integer.class, ms.getResultMaps()
-				.get(0).getResultMappings()).build());
+        ms = createNewMappedStatementForPagination(ms, boundSql,
+                resultMap, parameters, pageable);
+      }
+    }
 
-		builder.resource(ms.getResource())
-				.fetchSize(ms.getFetchSize())
-				.statementType(ms.getStatementType())
-				.keyGenerator(ms.getKeyGenerator())
-				.timeout(ms.getTimeout())
-				.parameterMap(ms.getParameterMap())
-				// .resultMaps(ms.getResultMaps())
-				.resultMaps(resultMaps).resultSetType(ms.getResultSetType())
-				.cache(ms.getCache())
-				.flushCacheRequired(ms.isFlushCacheRequired())
-				.useCache(ms.isUseCache());
+    return invocation.proceed();
+  }
 
-		return builder.build();
-	}
+  public Object plugin(Object target) {
+    return Plugin.wrap(target, this);
+  }
 
-	private MappedStatement createNewMappedStatementForPagination(
-			MappedStatement ms, final BoundSql boundSql,
-			List<ResultMap> resultMap, Object parameters, Pageable pageable)
-			throws Exception {
+  public void setProperties(Properties properties) {
+  }
 
-		final StringBuilder sql = new StringBuilder();
-		sql.append("SELECT * FROM (SELECT CEI_PAGINATION.*, ROWNUM AS ROW_NUM FROM (");
+  private MappedStatement createNewMappedStatementForTotalCount(
+          final MappedStatement ms, Object param) throws Exception {
+    final BoundSql boundSql = ms.getBoundSql(param);
+    final StringBuilder sql = new StringBuilder();
+    sql.append("SELECT COUNT(*) FROM (");
+    sql.append(boundSql.getSql());
+    sql.append(")");
 
-		if (pageable.getSort() == null || "".equals(pageable.getSort()))
-			sql.append(boundSql.getSql());
-		else {
-			sql.append("SELECT * FROM (");
-			sql.append(boundSql.getSql());
-			sql.append(") ORDER BY ").append(pageable.getSort());
-		}
+    Builder builder = new Builder(ms.getConfiguration(),
+            ms.getId() + "_Count", new SqlSource() {
+      public BoundSql getBoundSql(Object parameterObject) {
+        return new BoundSql(ms.getConfiguration(),
+                sql.toString(),
+                boundSql.getParameterMappings(),
+                boundSql.getParameterObject());
+      }
+    }, ms.getSqlCommandType());
 
-		sql.append(") CEI_PAGINATION WHERE ROWNUM <= ")
-				.append(pageable.getRowPerPage() * pageable.getPage())
-				.append(") WHERE ROW_NUM > ")
-				.append(pageable.getRowPerPage() * (pageable.getPage() - 1));
+    List<ResultMap> resultMaps = new ArrayList<ResultMap>(1);
+    resultMaps.add(new ResultMap.Builder(ms.getConfiguration(), ms.getId()
+            + "_Count_Inline", Integer.class, ms.getResultMaps()
+            .get(0).getResultMappings()).build());
 
-		try {
-			Field field = BoundSql.class.getDeclaredField("sql");
-			field.setAccessible(true);
-			field.set(boundSql, sql.toString());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+    builder.resource(ms.getResource())
+            .fetchSize(ms.getFetchSize())
+            .statementType(ms.getStatementType())
+            .keyGenerator(ms.getKeyGenerator())
+            .timeout(ms.getTimeout())
+            .parameterMap(ms.getParameterMap())
+            // .resultMaps(ms.getResultMaps())
+            .resultMaps(resultMaps).resultSetType(ms.getResultSetType())
+            .cache(ms.getCache())
+            .flushCacheRequired(ms.isFlushCacheRequired())
+            .useCache(ms.isUseCache());
 
-		Builder builder = new Builder(ms.getConfiguration(),
-				ms.getId(), new SqlSource() {
-					public BoundSql getBoundSql(Object parameterObject) {
-						return boundSql;
-					}
-				}, ms.getSqlCommandType());
+    return builder.build();
+  }
 
-		builder.resource(ms.getResource()).fetchSize(ms.getFetchSize())
-				.statementType(ms.getStatementType())
-				.keyGenerator(ms.getKeyGenerator()).timeout(ms.getTimeout())
-				.parameterMap(ms.getParameterMap()).resultMaps(resultMap)
-				.resultSetType(ms.getResultSetType()).cache(ms.getCache())
-				.flushCacheRequired(ms.isFlushCacheRequired())
-				.useCache(ms.isUseCache());
+  private MappedStatement createNewMappedStatementForPagination(
+          MappedStatement ms, final BoundSql boundSql,
+          List<ResultMap> resultMap, Object parameters, Pageable pageable)
+          throws Exception {
 
-		return builder.build();
-	}
+    final StringBuilder sql = new StringBuilder();
+    sql.append("SELECT * FROM (SELECT CEI_PAGINATION.*, ROWNUM AS ROW_NUM FROM (");
+
+    if (pageable.getSort() == null) {
+      sql.append(boundSql.getSql());
+    }
+    else {
+      sql.append("SELECT * FROM (")
+         .append(boundSql.getSql())
+         .append(") ORDER BY ");
+
+      pageable.getSort().iterator().forEachRemaining(
+              order -> sql.append(order.getProperty()).append(' ')
+                          .append(order.getDirection()).append(' '));
+    }
+
+    sql.append(") CEI_PAGINATION WHERE ROWNUM <= ")
+            .append(pageable.getPageSize() * pageable.getPageNumber())
+            .append(") WHERE ROW_NUM > ")
+            .append(pageable.getPageSize() * (pageable.getPageNumber() - 1));
+
+    try {
+      Field field = BoundSql.class.getDeclaredField("sql");
+      field.setAccessible(true);
+      field.set(boundSql, sql.toString());
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    Builder builder = new Builder(ms.getConfiguration(),
+            ms.getId(), parameterObject -> boundSql, ms.getSqlCommandType());
+
+    builder.resource(ms.getResource()).fetchSize(ms.getFetchSize())
+            .statementType(ms.getStatementType())
+            .keyGenerator(ms.getKeyGenerator()).timeout(ms.getTimeout())
+            .parameterMap(ms.getParameterMap()).resultMaps(resultMap)
+            .resultSetType(ms.getResultSetType()).cache(ms.getCache())
+            .flushCacheRequired(ms.isFlushCacheRequired())
+            .useCache(ms.isUseCache());
+
+    return builder.build();
+  }
 }

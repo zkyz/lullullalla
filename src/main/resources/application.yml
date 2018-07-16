@@ -39,3 +39,13 @@ management:
   endpoints:
     web:
       base-path: /system/actuator
+
+
+mybatis:
+  mapper-locations: classpath:kr/or/knia/cbms/core/bbs/BbsMapper.xml
+  type-aliases-package: kr.or.knia.cbms
+  type-handlers-package: kr.or.knia.cbms.config.mybatis.typehandler
+  configuration:
+    jdbc-type-for-null: varchar
+    map-underscore-to-camel-case: true
+

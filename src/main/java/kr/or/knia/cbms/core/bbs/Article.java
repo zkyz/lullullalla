@@ -9,13 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Entity
-@Table(name = "CBMS_BBS")
-@SequenceGenerator(name = Article.SQ_BBS_ID, sequenceName = Article.SQ_BBS_ID, allocationSize = 1)
 public class Article {
-  public static final String SQ_BBS_ID = "SQ_CBMS_BBS_ID";
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = SQ_BBS_ID)
   private Integer id;
 
   @NotEmpty
@@ -24,8 +18,9 @@ public class Article {
   @NotEmpty
   private String subject;
 
+  private String content;
+
   private LocalDateTime created;
 
-  @LastModifiedDate
   private LocalDateTime updated;
 }
